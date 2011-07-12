@@ -98,19 +98,22 @@ var lambda = (function() {
     function isScalar(value) {
         return scalars[typeof value] || value === null; 
     }
-    
+
     function withArity(arity, fn) {
-        // TODO: Forward toString
         if (arity < 0) throw Error();
         var args = map(Array(arity), function(v, i) { return '$' + i; });
     
         if (Function.bind) {
             var body = 'return this.apply(null, arguments)';
-            return Function.apply(null, args.concat([body])).bind(fn);
+            var result = Function.apply(null, args.concat([body])).bind(fn);
+            // result.toString = fn.toString.bind(fn);
+            return result;
         }
         else {
             var body = 'return fn.apply(null, arguments)';
-            return eval('function(' + args.join(', ') + ') { ' + body + ' }');
+            var result = eval('function(' + args.join(', ') + ') { ' + body + ' }');
+            // result.toString = function() { return fn.toString(); };
+            return result;
         }
     }
 
@@ -249,23 +252,23 @@ var lambda = (function() {
         });
     }
 
-    lambda.id = lambda.identity = identity;
+    lambda.id = lambda.identity = lambda(identity);
 
-    lambda.each  = each;
-    lambda.count = count;
-    lambda.map   = map;
-    lambda.fold  = fold;
-    lambda.all   = all;
-    lambda.any   = any;
-    lambda.find  = find;
-    lambda.fill  = fill;
+    lambda.each  = lambda(each);
+    lambda.count = lambda(count);
+    lambda.map   = lambda(map);
+    lambda.fold  = lambda(fold);
+    lambda.all   = lambda(all);
+    lambda.any   = lambda(any);
+    lambda.find  = lambda(find);
+    lambda.fill  = lambda(fill);
 
     // Q: Should bind, curry, compose, etc. return normal functions or lambdas?
-    lambda.bind    = lambda(function(fn, cx)               { return /*lambda*/(bind.apply(this, arguments)); });
-    lambda.flip    = lambda(function(fn)                   { return /*lambda*/(flip.apply(this, arguments)); });
-    lambda.memoize = lambda(function(fn)                   { return /*lambda*/(memoize.apply(this, arguments)); });
-    lambda.curry   = lambda(function(fn, arg1, arg2, argN) { return /*lambda*/(curry.apply(this, arguments)); });
-    lambda.compose = lambda(function(fn1, fn2, fnN)        { return /*lambda*/(compose.apply(this, arguments)); });
+    lambda.bind    = lambda(bind);    // lambda(function(fn, cx)  { return /*lambda*/(bind.apply(this, arguments)); });
+    lambda.flip    = lambda(flip);    // lambda(function(fn)      { return /*lambda*/(flip.apply(this, arguments)); });
+    lambda.memoize = lambda(memoize); // lambda(function(fn)      { return /*lambda*/(memoize.apply(this, arguments)); });
+    lambda.curry   = lambda(curry);   // lambda(function(/*fn, arg1, arg2, argN*/) { return /*lambda*/(curry.apply(this, arguments)); });
+    lambda.compose = lambda(compose); // lambda(function(/*fn1, fn2, fnN*/)        { return /*lambda*/(compose.apply(this, arguments)); });
 
     // Logic operators
     lambda.not = lambda('!_');
