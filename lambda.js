@@ -93,11 +93,11 @@ var lambda = (function() {
         return arg === global._ || arg === undefined;
     }
 
-    var scalars = {'number': true, 'string': true, 'boolean': true};
+    /*var scalars = {'number': true, 'string': true, 'boolean': true};
 
     function isScalar(value) {
         return scalars[typeof value] || value === null; 
-    }
+    }*/
 
     function withArity(arity, fn) {
         if (arity < 0) throw Error();
@@ -135,35 +135,12 @@ var lambda = (function() {
     }
 
     function memoize(fn) {
-        var strings = {};
-        var scalars = {};
-        var others  = [];
-        
+        var table = {}, hasher = arguments[1] || String;
         return withArity(fn.length, function() {
-            var key = slice.call(arguments);
-            
-            if (key.length === 1 && typeof key[0] === 'string') { // Fast path, O(1)
-                key = key[0];
-                if (strings.hasOwnProperty(key)) return strings[key];
-                else return strings[key] = fn.apply(this, arguments);
-            }
-            else if (all(key, isScalar)) { // Moderate path, O(key)
-                key = key.length + ';' + map(key, function(value) {
-                    return typeof value + ':' + value; }).join(',');
-                if (scalars.hasOwnProperty(key)) return scalars[key];
-                else return scalars[key] = fn.apply(this, arguments);
-            }
-            else { // Slow path, O(N)
-                // var entry = find(others, curry(compose(compare, first), key));
-                var entry = find(others, function(entry) { return compare(entry[0], key); });
-          
-                if (entry) return entry[1];  
-                else {
-                    var value = fn.apply(this, arguments);
-                    others.push([key, value]);
-                    return value;
-                }
-            }
+            var key = slice.call(arguments), hash = hasher(key),
+                row = table[hash] || (table[hash] = []),
+                cell = find(row, function(cell) { return compare(cell[0], key); });
+            return (cell ? cell : row[row.length] = [key, fn.apply(this, key)])[1];
         });
     }
     
@@ -252,17 +229,17 @@ var lambda = (function() {
         });
     }
 
+    function fanout(fn1, fn2) { // Q: Make variadic?
+        return withArity(Math.max(fn1.length, fn2.length), function() {
+            return [fn1.apply(this, arguments), fn2.apply(this, arguments)];
+        });
+    }
+
+    // Values
     lambda.id = lambda.identity = lambda(identity);
+    lambda.noop = lambda(function() {});
 
-    lambda.each  = lambda(each);
-    lambda.count = lambda(count);
-    lambda.map   = lambda(map);
-    lambda.fold  = lambda(fold);
-    lambda.all   = lambda(all);
-    lambda.any   = lambda(any);
-    lambda.find  = lambda(find);
-    lambda.fill  = lambda(fill);
-
+    // Functions
     // Q: Should bind, curry, compose, etc. return normal functions or lambdas?
     lambda.bind    = lambda(bind);    // lambda(function(fn, cx)  { return /*lambda*/(bind.apply(this, arguments)); });
     lambda.flip    = lambda(flip);    // lambda(function(fn)      { return /*lambda*/(flip.apply(this, arguments)); });
@@ -309,7 +286,7 @@ var lambda = (function() {
     lambda.unidentical = lambda('_ !== _');
 
     // Math
-    lambda.power  = lambda('Math.pow(_, _)');
+    lambda.power  = lambda(Math.pow);
     lambda.square = lambda.power(_, 2);
     lambda.cube   = lambda.power(_, 3);
 
@@ -324,8 +301,16 @@ var lambda = (function() {
     lambda.del = lambda('delete _') // Q: _[_] ?
 
     // Types
-    lambda.is   = lambda('_ instanceof _');
     lambda.type = lambda('typeof _');
+    lambda.is   = lambda('_ instanceof _');
+    lambda.cons = lambda('_.constructor');
+    lambda.prot = lambda('_.prototype');
+
+    // Arrows
+    lambda.fanout = lambda(fanout);
+
+    // Control
+    lambda.ifElse = lambda('_ ? _ : _');
 
     // Arrays
     lambda.concat   = lambda('_.concat(_)');
@@ -341,21 +326,31 @@ var lambda = (function() {
     lambda.unshift  = lambda('_.unshift(_)');
     lambda.valueOf  = lambda('_.valueOf()');
 
-    // Sequences
+    // Iteration
+    lambda.each  = lambda(each);
+    lambda.count = lambda(count);
+    lambda.map   = lambda(map);
+    lambda.fold  = lambda(fold);
+    lambda.all   = lambda(all);
+    lambda.any   = lambda(any);
+    lambda.find  = lambda(find);
+    lambda.fill  = lambda(fill);
+
+    // Lists
     lambda.first  = lambda.get(_, 0);
     lambda.second = lambda.get(_, 1);
     lambda.third  = lambda.get(_, 2);
     lambda.last   = lambda('_1[_1.length - 1]');
+    lambda.lead   = lambda('_.slice(0, -1)');
     lambda.tail   = lambda('_.slice(1)');
-
-    // Prototypes
-    lambda.cons = lambda('_.constructor');
-    lambda.prot = lambda('_.prot');
+    lambda.take   = lambda('_.slice(0, _)');
+    lambda.drop   = lambda('_.slice(_)');
+    lambda.part   = lambda.fanout(lambda.take, lambda.drop);
 
     // Miscellaneous
-    lambda.ifElse   = lambda('_ ? _ : _');
-    lambda.length   = lambda('_.length');
-    lambda.toString = lambda('_.toString()'); 
+    lambda.nil = lambda.empty      = lambda('_.length == 0');
+    lambda.len = /*lambda.length =*/ lambda('_.length');
+    lambda.str = lambda.toString   = lambda('_.toString()'); 
 
     return lambda;
 })();
