@@ -40,7 +40,7 @@ var lambda = (function() {
     function lambda(fn) {
         switch (typeof fn) {
             case 'string': return wrap(parse(fn), [], quote(fn, "'"));
-            case 'function': return fn.lambda ? fn : wrap(fn, [], fn.toString());
+            case 'function': return fn.lambda ? fn : wrap(fn, [], fn.name || 'function');
             default: throw TypeError("Invalid function for lambda");
         }
     }
@@ -93,12 +93,6 @@ var lambda = (function() {
         return arg === global._ || arg === undefined;
     }
 
-    /*var scalars = {'number': true, 'string': true, 'boolean': true};
-
-    function isScalar(value) {
-        return scalars[typeof value] || value === null; 
-    }*/
-
     function withArity(arity, fn) {
         if (arity < 0) throw Error();
         var args = map(Array(arity), function(v, i) { return '$' + i; });
@@ -134,7 +128,7 @@ var lambda = (function() {
         return result.concat(slice.call(b, j));
     }
 
-    function memoize(fn) {
+    function memoize(fn/*, hasher*/) {
         var table = {}, hasher = arguments[1] || String;
         return withArity(fn.length, function() {
             var key = slice.call(arguments), hash = hasher(key),
@@ -166,7 +160,6 @@ var lambda = (function() {
     }
 
     function each(array, fn) {
-        // any(array, function(elt, e) { fn(elt, e); return false; });
         for (var i = 0; i < array.length; ++i) {
             var result = fn.call(this, array[i], i);
             if (result !== undefined) return result;
@@ -180,10 +173,19 @@ var lambda = (function() {
     }
 
     function all(array, fn) {
+        // return !any(array, negate(fn));
         return !each(array, function(elt, e) {
             if (!fn.call(this, elt, e)) return true; 
         });
-    }   
+    } 
+
+    function none(array, fn) {
+        return !any(array, fn);
+    }  
+
+    function one(array, fn) {
+        return count(array, fn) === 1;
+    }
 
     function find(array, fn) {
         return each(array, function(elt, e) {
@@ -212,15 +214,9 @@ var lambda = (function() {
         each(array, function(next) { value = fn.call(this, value, next); });
         return value;
     }
-    
-    function compare(array1, array2) {
-        // Implement using: all(zip(arrays), lambda.equalsN)
-        if (array1.length !== array2.length) return false;
-        else for (var i = 0; i < array1.length; ++i) {
-            if (array1[i] !== array2[i]) return false;
-        }
 
-        return true;
+    function apply(fn, args) {
+        return fn.apply(this, args);
     }
 
     function bind(fn, cx) {
@@ -229,10 +225,28 @@ var lambda = (function() {
         });
     }
 
-    function fanout(fn1, fn2) { // Q: Make variadic?
-        return withArity(Math.max(fn1.length, fn2.length), function() {
-            return [fn1.apply(this, arguments), fn2.apply(this, arguments)];
+    function compare(array1, array2) { // Q: Make variadic?
+        return array1.length === array2.length &&
+            all(zip(array1, array2), lambda.identical);
+    }
+
+    function fanout() {
+        var fns = slice.call(arguments);
+        var arity = Math.max.apply(null, pluck(fns, 'length'));
+        return withArity(arity, function() {
+            return map(fns, curry(flip(apply), arguments));
         });
+    }
+
+    function pluck(array, name) {
+        return map(array, function(elt) { return elt[name]; });
+    }
+
+    function zip() {
+        var arrays = slice.call(arguments);
+        var result = Array(Math.max.apply(null, pluck(arrays, 'length')));
+        each(result, function(elt, i) { result[i] = pluck(arrays, i); });
+        return result;
     }
 
     // Values
@@ -246,6 +260,7 @@ var lambda = (function() {
     lambda.memoize = lambda(memoize); // lambda(function(fn)      { return /*lambda*/(memoize.apply(this, arguments)); });
     lambda.curry   = lambda(curry);   // lambda(function(/*fn, arg1, arg2, argN*/) { return /*lambda*/(curry.apply(this, arguments)); });
     lambda.compose = lambda(compose); // lambda(function(/*fn1, fn2, fnN*/)        { return /*lambda*/(compose.apply(this, arguments)); });
+    lambda.apply   = lambda(apply);
 
     // Logic operators
     lambda.not = lambda('!_');
@@ -292,7 +307,7 @@ var lambda = (function() {
 
     // Parity
     lambda.even = lambda('_ % 2 == 0');
-    lambda.odd  = lambda.compose(lambda.not, lambda.even);
+    lambda.odd  = lambda(compose(lambda.not, lambda.even));
 
     // Properties
     lambda.get = lambda('_[_]');
@@ -330,11 +345,15 @@ var lambda = (function() {
     lambda.each  = lambda(each);
     lambda.count = lambda(count);
     lambda.map   = lambda(map);
+    lambda.pluck = lambda(pluck);
+    lambda.zip   = lambda(zip);
     lambda.fold  = lambda(fold);
     lambda.all   = lambda(all);
     lambda.any   = lambda(any);
+    lambda.none  = lambda(none);
+    lambda.one   = lambda(one);
     lambda.find  = lambda(find);
-    lambda.fill  = lambda(fill);
+ // lambda.fill  = lambda(fill);
 
     // Lists
     lambda.first  = lambda.get(_, 0);

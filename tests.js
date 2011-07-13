@@ -36,6 +36,9 @@ equal( lambda.curry(div)(6, 2), 3 );
 equal( lambda.curry(div, 6)(2), 3 );
 equal( lambda.curry(div, 6, 2)(), 3 );
 
+equal( lambda.apply(mul, [7, 5]), 35 );
+equal( lambda.apply(mul)([7, 5]), 35 );
+
 // Arrows
 equalStrings( lambda.fanout(mul, div)(10, 5), [50, 2] );
 
@@ -50,28 +53,52 @@ equal( lambda.odd(84), false );
 equal( lambda.odd(85), true );
 
 // Lists
-var list = [5, 1, 6, 4, 2, 3];
+var nums = [5, 1, 6, 4, 2, 3];
+var strs = ['a', 'ab', 'abc'];
 
-equal( lambda.first(list), 5 );
-equal( lambda.second(list), 1 );
-equal( lambda.third(list), 6 );
-equal( lambda.last(list), 3 );
+equal( lambda.first(nums), 5 );
+equal( lambda.second(nums), 1 );
+equal( lambda.third(nums), 6 );
+equal( lambda.last(nums), 3 );
 
-equalStrings( lambda.lead(list), [5, 1, 6, 4, 2] );
-equalStrings( lambda.tail(list), [1, 6, 4, 2, 3] );
-equalStrings( lambda.take(list, 2), [5, 1] );
-equalStrings( lambda.drop(list, 3), [4, 2, 3] );
-equalStrings( lambda.part(list, 4), [[5, 1, 6, 4], [2, 3]] );
+equalStrings( lambda.lead(nums), [5, 1, 6, 4, 2] );
+equalStrings( lambda.tail(nums), [1, 6, 4, 2, 3] );
+equalStrings( lambda.take(nums, 2), [5, 1] );
+equalStrings( lambda.drop(nums, 3), [4, 2, 3] );
+equalStrings( lambda.part(nums, 4), [[5, 1, 6, 4], [2, 3]] );
+
+// Iteration
+equal( lambda.each(nums, function(n, i) { if (i == 3) return i; }), 3 );
+equal( lambda.each(nums, function(n, i) {}), undefined );
+equal( lambda.count(nums, lambda.equals), 1 );
+equal( lambda.fold(nums, lambda.plus, 21), 42 );
+equal( lambda.find(nums, lambda.even), 6 );
+
+equal( lambda.all(nums, function(n) { return n < 6; }), false );
+equal( lambda.all(nums, function(n) { return n < 7; }), true );
+equal( lambda.any(nums, function(n) { return n == 6; }), true );
+equal( lambda.any(nums, function(n) { return n == 7; }), false );
+equal( lambda.none(nums, function(n) { return n == 6; }), false );
+equal( lambda.none(nums, function(n) { return n == 7; }), true );
+equal( lambda.one(nums, function(n) { return n < 1; }), false );
+equal( lambda.one(nums, function(n) { return n < 2; }), true );
+
+equalStrings( lambda.map(nums, lambda.square), [25, 1, 36, 16, 4, 9] );
+equalStrings( lambda.pluck(strs, 'length'), [1, 2, 3] );
+equalStrings( lambda.zip(nums, strs), [[5, 'a'], [1, 'ab'], [6, 'abc'],
+        [4, undefined], [2, undefined], [3, undefined]] );
 
 // Miscellaneous
 equal( lambda.empty([]), true );
-equal( lambda.empty(list), false );
+equal( lambda.empty(nums), false );
 
 equal( lambda.len([]), 0 );
-equal( lambda.len(list), 6 );
+equal( lambda.len(nums), 6 );
 
 equal( lambda.toString([]), '' );
-equal( lambda.toString(list), '5,1,6,4,2,3' );
+equal( lambda.toString(nums), '5,1,6,4,2,3' );
+
+// Helpers
 
 function equal(a, b) {
     if (a !== b) throw Error("Test failed: " + a + " !== " + b);
