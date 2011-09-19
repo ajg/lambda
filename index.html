@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html><head>
+<title>Lambda.js</title>
+<script type="application/javascript" src="lambda.js"></script>
+<link type="text/css" href="lambda.css" rel="stylesheet" media="all" />
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+</head><body><h1>Lambda.js</h1>
+<p><a href="http://ajg.github.com/lambda/">Lambda</a> is an experimental functional library for JavaScript, written
+by <a href="mailto:plus{dot}ajg{at}gmail{dot}com">Alvaro J. Gutierrez</a>. It aims to make functional programming in
+JavaScript more succinct, practical and elegant.</p>
+<p>Hosting for the <a href="http://github.com/ajg/lambda/">project</a> is kindly provided by GitHub. You
+can report bugs and discuss features on the <a href="http://github.com/ajg/lambda/issues/">issues</a> page.</p>
+<h2>Downloads</h2>
+<ol>
+<li>
+<p><a href="lambda.js">Plain Version (0.1)</a>
+<em>Uncompressed, with comments (13K)</em></p>
+</li>
+<li>
+<p><a href="lambda-shrunk.js">Compressed Version (0.1)</a>
+<em>Compressed, without comments (5K)</em></p>
+</li>
+</ol>
+<h2>Introduction</h2>
+<p><a href="http://ajg.github.com/lambda/">Lambda</a> provides three useful tools to improve functional programming
+in JavaScript: First, it lets you succinctly [define][] new functions using
+placeholder notation. Second, it lets you [enhance][] existing functions
+and bring them up to snuff. Third, it [supplies][] a stable of core functions
+without which you'll feel lost and desolate. Together, they assemble
+to form Voltron!</p>
+<h2>Usage</h2>
+<p>The main access point to <a href="http://ajg.github.com/lambda/">Lambda</a> is the <code>lambda</code> object and function.</p>
+<p>As an object, it offers <a href="#supplies">supplies</a> several functions ready to be applied.</p>
+<p>As a function, it accepts a single argument, <code>fn</code>, which can be either
+a string or a function. If it is a string, it will define a new lambda.
+If it's a function, it will enhance the existing function by 'wrapping'
+it in a lambda.</p>
+<h2>Partial Application</h2>
+<p>Lambdas are different from regular functions in a few ways, one of which is the
+way arguments are handled. In particular, lambdas let you omit arguments when
+you call them. The result of calling a lambda with missing arguments is a
+<em>partially applied</em> lambda, which means it itself can be called with the 
+remaining arguments to <em>complete</em> the call. There are two ways to partially
+apply lambdas:</p>
+<h3 id="implicitly">Implicitly</h3>
+<p>When a lambda is called with fewer arguments than necessary (according to its
+arity), the result is a partially applied function. Once the required arity is
+met (or surpassed), the original function is called.</p>
+<pre><code>var plusFour = lambda.plus(4);
+
+plusFour(1)
+>> 5
+
+plusFour(5)
+>> 9
+</code></pre>
+<h3 id="explicitly">Explicitly</h3>
+<p>Sometimes the position in which missing arguments are supplied does not match
+that of the function's argument list; that is, the missing arguments may not
+be at the end.</p>
+<p>In such cases, placeholders can be used. The placeholder symbol is <code>_</code>. When
+a lambda is called using one or more placeholders, those arguments are
+considered missing, while the rest will be used towards partial application.</p>
+<pre><code>var cube = lambda.pow(_, 3);
+
+cube(4)
+>> 64
+
+cube(2)
+>> 8
+</code></pre>
+<h2>Compatibility</h2>
+<p>So far, <a href="http://ajg.github.com/lambda/">Lambda</a> has only been tested using the Rhino, Spidermonkey, Carakan
+and V8 JavaScript engines, the latter of which power Firefox, Opera and Chrome,
+respectively.</p>
+<p>If you would find it in your heart to test the library, and report any issues,
+with other engines, such as Chakra (Internet Explorer) or SquirrelFish (Safari),
+then the universe will certainly smile upon you.</p>
+<h2 id="supplies">Supplies</h2>
+<h3 id="properties">Properties</h3>
+<p><a href="#get">get</a>, <a href="#set">set</a>, <a href="#has">has</a>, <a href="#del">del</a></p>
+<h3 id="lists">Lists</h3>
+<p><a href="#first">first</a>, <a href="#second">second</a>, <a href="#third">third</a>, <a href="#last">last</a>,
+<a href="#drop">drop</a>, <a href="#take">take</a>, <a href="#lead">lead</a>, <a href="#tail">tail</a>, <a href="#part">part</a></p>
+<h3 id="functions">Functions</h3>
+<p>bind, flip, memoize, curry, compose, apply</p>
+<h3 id="operators">Operators</h3>
+<ul>
+<li>Unary      — <a href="#increment">increment</a>, <a href="#decrement">decrement</a></li>
+<li>Arithmetic — <a href="#posated">posated</a>, <a href="#negated">negated</a>,
+               <a href="#plus">plus</a>, <a href="#minus">minus</a>, <a href="#times">times</a>,
+               <a href="#over">over</a>, <a href="#modulo">modulo</a></li>
+<li>Logical    — <a href="#not">not</a>, <a href="#and">and</a>, <a href="#or">or</a>, <a href="#xor">xor</a></li>
+<li>Bitwise    — <a href="#bitNot">bitNot</a>, <a href="#bitAnd">bitAnd</a>,
+               <a href="#bitOr">bitOr</a>, <a href="#bitXor">bitXor</a>,</li>
+<li>Shifting   — <a href="#leftShift">leftShift</a>, <a href="#rightShift">rightShift</a>,
+               <a href="#logicShift">logicShift</a></li>
+<li>Comparison — equals, unequals, greater, lesser, greaterEqual,
+               lesserEqual, identical, unidentical</li>
+</ul>
+<h3 id="math">Math</h3>
+<p><a href="#power">power</a>, <a href="#square">square</a>, <a href="#cube">cube</a></p>
+<h3 id="parity">Parity</h3>
+<p><a href="#even">even</a>, <a href="#odd">odd</a></p>
+<h3 id="values">Values</h3>
+<p><a href="#identity">identity</a>, <a href="#noop">noop</a></p>
+<h3 id="types">Types</h3>
+<p><a href="#type">type</a>, <a href="#is">is</a>, <a href="#cons">cons</a>, <a href="#prot">prot</a> </p>
+<h3 id="arrows__control">Arrows & Control</h3>
+<p>fanout, ifElse</p>
+<h3 id="arrays">Arrays</h3>
+<p>lambda.concat, indexOf, join, pop, push, reverse,
+shift, slice, sort, splice, unshift, valueOf</p>
+<h3 id="iteration">Iteration</h3>
+<p>each, count, map, pluck, zip, fold,
+all, any, none, one, find</p>
+<h3 id="miscellaneous">Miscellaneous</h3>
+<p><a href="#empty">empty</a>, <a href="#length">length</a>, <a href="#toString">toString</a></p>
+<h2>Properties</h2>
+<h4 id="get">.get <code>(object, name)</code></h4>
+<p>Returns the value of property <code>name</code> in <code>object</code>.</p>
+<h4 id="set">.set <code>(object, name, value)</code></h4>
+<p>Sets property <code>name</code> in <code>object</code> to <code>value</code>, and returns the latter.</p>
+<h4 id="has">.has <code>(object, name)</code></h4>
+<p>Returns whether <code>object</code> has property <code>name</code> defined (but not inherited.)</p>
+<h4 id="del">.del <code>(object, name)</code></h4>
+<p>Unsets property <code>name</code> in <code>object</code>, and returns whether it was successful.</p>
+<pre><code>var object = {foo: 42, bar: 66};
+
+lambda.get(object, 'foo')
+>> 42
+lambda.set(object, 'qux', 84)
+>> 84
+lambda.has(object, 'qux')
+>> true
+lambda.del(object, 'foo')
+>> true
+lambda.del([], 'length')
+>> false
+</code></pre>
+<h2>Lists</h2>
+<h4 id="first">.first  <code>(sequence)</code> <em>Shortcut: <strong>fst</strong></em></h4>
+<h4 id="second">.second <code>(sequence)</code> <em>Shortcut: <strong>snd</strong></em></h4>
+<h4 id="third">.third  <code>(sequence)</code> <em>Shortcut: <strong>thr</strong></em></h4>
+<p>Return the elements at indices 0, 1, and 2, respectively.</p>
+<pre><code>var array = [25, 16, 9, 4, 1];
+
+lambda.fst(array)
+>> 25
+lambda.snd(array)
+>> 16
+lambda.thr(array)
+>> 9
+</code></pre>
+<h4 id="last">.last <code>(sequence)</code></h4>
+<p>Return the last element of <code>sequence</code>.</p>
+<pre><code>lambda.last([25, 16, 9, 4, 1])
+>> 1
+</code></pre>
+<h4 id="drop">.drop <code>(n, sequence)</code></h4>
+<p>Return <code>sequence</code> minus the first <code>n</code> elements.</p>
+<pre><code>lambda.drop(3, [25, 16, 9, 4, 1])
+>> [4, 1]
+</code></pre>
+<h4 id="take">.take <code>(n, sequence)</code></h4>
+<p>Return the first <code>n</code> elements of <code>sequence</code>.</p>
+<pre><code>lambda.take(3, [25, 16, 9, 4, 1])
+>> [25, 16, 9]
+</code></pre>
+<h4 id="tail">.tail <code>(sequence)</code></h4>
+<p>Return <code>sequence</code> minus the first element.</p>
+<pre><code>lambda.tail([25, 16, 9, 4, 1])
+>> [16, 9, 4, 1]
+</code></pre>
+<h4 id="lead">.lead <code>(sequence)</code></h4>
+<p>Return <code>sequence</code> minus the last element.</p>
+<pre><code>lambda.lead([25, 16, 9, 4, 1])
+>> [25, 16, 9, 4]
+</code></pre>
+<h4 id="part">.part <code>(n, sequence)</code></h4>
+<p>Return <code>sequence</code> partitioned into elements up to <code>n</code>, and from <code>n</code> on,
+which is equivalent to <code>[take(n, sequence), drop(n, sequence)]</code>.</p>
+<pre><code>lambda.part(3, [25, 16, 9, 4, 1])
+>> [[25, 16, 9], [4, 1]]
+</code></pre>
+<h2>Operators</h2>
+<h3 id="unary">Unary</h3>
+<h4 id="increment">.increment <code>(x)</code> <em>Shortcut: <strong>inc</strong></em></h4>
+<h4 id="decrement">.decrement <code>(x)</code> <em>Shortcut: <strong>dec</strong></em></h4>
+<p>Apply prefix operators <code>++</code> and <code>--</code> respectively, to the argument.</p>
+<pre><code>lambda.inc(4)
+>> 5
+
+lambda.dec(2)
+>> 1
+</code></pre>
+<h3 id="arithmetic">Arithmetic</h3>
+<h4 id="posated">.posated <code>(x)</code> <em>Shortcut: <strong>pos</strong></em></h4>
+<h4 id="negated">.negated <code>(x)</code> <em>Shortcut: <strong>neg</strong></em></h4>
+<p>Apply prefix operators <code>+</code> and <code>-</code> respectively, to the argument.</p>
+<pre><code>lambda.pos(4)
+>> 4
+
+lambda.neg(2)
+>> -2
+</code></pre>
+<h4 id="plus">.plus   <code>(x, y)</code> <em>Shortcut: <strong>add</strong></em></h4>
+<h4 id="minus">.minus  <code>(x, y)</code> <em>Shortcut: <strong>sub</strong></em></h4>
+<h4 id="times">.times  <code>(x, y)</code> <em>Shortcut: <strong>mul</strong></em></h4>
+<h4 id="over">.over   <code>(x, y)</code> <em>Shortcut: <strong>div</strong></em></h4>
+<h4 id="modulo">.modulo <code>(x, y)</code> <em>Shortcut: <strong>mod</strong></em></h4>
+<p>Apply operators <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> and <code>%</code>, respectively,
+to the arguments.</p>
+<pre><code>lambda.plus(8, 2)
+>> 10
+lambda.minus(8, 2)
+>> 6
+lambda.times(8, 2)
+>> 16
+lambda.over(8, 2)
+>> 4
+lambda.modulo(8, 2)
+>> 0
+</code></pre>
+<h3 id="logical">Logical</h3>
+<h4 id="not">.not <code>(x)</code></h4>
+<h4 id="and">.and <code>(x, y)</code></h4>
+<h4 id="or">.or  <code>(x, y)</code></h4>
+<h4 id="xor">.xor <code>(x, y)</code></h4>
+<p>Apply operators <code>!</code>, <code>&&</code>, <code>||</code>, respectively, to the arguments. The latter,
+<code>xor</code>, is boolean exclusive or; meaning, <code>x</code> or <code>y</code>, but not <code>x</code> and <code>y</code>.</p>
+<pre><code>lambda.not(false)
+>> true
+lambda.and(true, false)
+>> false
+lambda.or(false, true)
+>> true
+lambda.xor(true, true)
+>> false
+</code></pre>
+<h3 id="bitwise">Bitwise</h3>
+<h4 id="bitNot">.bitNot <code>(x)</code></h4>
+<h4 id="bitAnd">.bitAnd <code>(x, y)</code></h4>
+<h4 id="bitOr">.bitOr  <code>(x, y)</code></h4>
+<h4 id="bitXor">.bitXor <code>(x, y)</code></h4>
+<p>Apply operators <code>~</code>, <code>&</code>, <code>|</code>, and <code>^</code>, respectively, to the arguments.</p>
+<pre><code>lambda.bitNot(5)
+>> -6
+lambda.bitAnd(4, 2)
+>> 0
+lambda.bitOr(4, 2)
+>> 6
+lambda.bitXor(5, -6)
+>> -1
+</code></pre>
+<h3 id="shifting">Shifting</h3>
+<h4 id="leftShift">.leftShift <code>(x, y)</code> <em>Shortcut: <strong>lshift</strong></em></h4>
+<h4 id="rightShift">.rightShift <code>(x, y)</code> <em>Shortcut: <strong>rshift</strong></em></h4>
+<h4 id="logicShift">.logic <code>(x, y)</code> <em>Shortcut: <strong>zshift</strong></em></h4>
+<p>Apply operators <code><<</code>, <code>>></code>, and <code>>>></code>, respectively, to the arguments.</p>
+<pre><code>lambda.lshift(4, 2)
+>> -16
+lambda.rshift(4, 2)
+>> -1
+lambda.zshift(4, 2)
+>> 1073741823
+</code></pre>
+<h2>Math</h2>
+<h4 id="power">.power <code>(x, y)</code></h4>
+<p>Return <code>x</code> raised to the <code>y</code>.</p>
+<pre><code>lambda.pow(4, 4)
+>> 64
+
+lambda.pow(9, 6)
+>> 531441
+</code></pre>
+<h4 id="square">.square <code>(x)</code></h4>
+<h4 id="cube">.cube <code>(x)</code></h4>
+<p>Return <code>x</code> raised to the power of two and three, respectively.</p>
+<pre><code>lambda.squared(-5)
+>> 25
+
+lambda.cubed(7)
+>> 343
+</code></pre>
+<h2>Parity</h2>
+<h4 id="even">.even <code>(x)</code></h4>
+<h4 id="odd">.odd <code>(x)</code></h4>
+<p>Return whether <code>x</code> is or isn't evenly divisible by two, respectively.</p>
+<pre><code>lambda.even(-5)
+>> false
+
+lambda.odd(7)
+>> true
+</code></pre>
+<h2>Values</h2>
+<h4 id="identity">.identity <code>(x)</code> <em>Shortcut: <strong>id</strong></em></h4>
+<p>Returns the very same value passed.</p>
+<pre><code>lambda.id(42)
+>> 42
+
+lambda.id(Object) === Object
+>> true
+</code></pre>
+<h4 id="noop">.noop <code>()</code></h4>
+<p>Stands for "no operation," and accordingly, doesn't do anything.</p>
+<h2>Types</h2>
+<h4 id="type">.type <code>(x)</code></h4>
+<p>Return the type of <code>x</code>, as determined by the <code>typeof</code> operator.</p>
+<pre><code>lambda.type(1)
+>> 'number'
+
+lambda.type({})
+>> 'object'
+</code></pre>
+<h4 id="is">.is <code>(x, t)</code></h4>
+<p>Return <code>x</code> is considered an instance of type <code>t</code>.</p>
+<h4 id="cons">.cons<code>(x)</code></h4>
+<p>Return the <code>constructor</code> of <code>x</code>.</p>
+<h4 id="prot">.prot <code>(x)</code></h4>
+<p>Return the prototype of <code>x</code>.</p>
+<h2>Miscellaneous</h2>
+<h4 id="empty">.empty <code>(x)</code> <em>Shortcut: <strong>nil</strong></em></h4>
+<p>Return whether the <code>x</code> has any elements.</p>
+<h4 id="length">.length <code>(x)</code> <em>Shortcut: <strong>len</strong></em></h4>
+<p>Return the number of elements in the <code>x</code>.</p>
+<h4 id="toString">.toString <code>(x)</code> <em>Shortcut: <strong>str</strong></em></h4>
+<p>Return the string representation of <code>x</code>.</p>
+<h2>Links</h2>
+<p><a href="http://www.boost.org/doc/libs/release/libs/lambda/">Boost.Lambda</a> helps make C++ marginally less unpleasant by
+providing a mechanism to manipulate functions at a higher level than the
+language would like you to. It inspired the underscore notation as
+well as the name. Note that it's been largely superceded by
+<a href="http://www.boost.org/doc/libs/release/libs/spirit/phoenix/">Boost.Phoenix</a>.</p>
+<p>There's a <a href="http://www.codecommit.com/blog/scala/quick-explanation-of-scalas-syntax">Quick Explanation of Scala’s _ + _ Syntax</a>,
+the latter of which is one of the motivations for this project. Note that 
+there are differences between the syntaxes used by Scala and Lambda.js.</p>
+<p>Finally, <a href="http://documentcloud.github.com/underscore/">Underscore.js</a> is an excellent utility library from
+which Lambda.js borrows a few ideas.</p>
+<h2>Implementation</h2>
+<p>On modern JavaScript engines, <a href="http://ajg.github.com/lambda/">Lambda</a> uses the <code>__proto__</code> property
+to set an extensible prototype chain for lambdas, without making
+any modification to normal functions. However, on older engines that
+don't support <code>__proto__</code>, <code>Function.prototype</code> is modified directly.</p>
+<h2>Changes</h2>
+<p><strong>0.1</strong>
+Initial release of <a href="http://ajg.github.com/lambda/">Lambda</a>.js.</p></body></html>
