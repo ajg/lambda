@@ -1,4 +1,3 @@
-
 Lambda.js
 =========
 
@@ -24,9 +23,9 @@ Introduction
 ------------
 
 [Lambda][] provides three useful tools to improve functional programming
-in JavaScript: First, it lets you succinctly [define][] new functions using
-placeholder notation. Second, it lets you [enhance][] existing functions
-and bring them up to snuff. Third, it [supplies][] a stable of core functions
+in JavaScript: First, it lets you succinctly define new functions using
+placeholder notation. Second, it lets you enhance existing functions
+and bring them up to snuff. Third, it supplies a stable of core functions
 without which you'll feel lost and desolate. Together, they assemble
 to form Voltron!
 
