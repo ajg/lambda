@@ -2,7 +2,7 @@
 // lambda library v1.0
 // Subject to the following license:
 // ---------------------------------
-// Copyright (c) 2011, Alvaro J. Gutierrez
+// Copyright (c) 2011, Alvaro J. Genial
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms,  with or without modifi-
