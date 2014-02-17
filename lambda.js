@@ -1,8 +1,8 @@
 //
-// lambda library v1.0
+// lambda library v1.0.1
 // Subject to the following license:
 // ---------------------------------
-// Copyright (c) 2011, Alvaro J. Genial
+// Copyright (c) 2014, Alvaro J. Genial (http://alva.ro)
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms,  with or without modifi-
@@ -69,7 +69,7 @@ var lambda = (function() {
 
     function wrap(fn, args, source) {
         var wrapper = withArity(argumentsMissing(fn, args), function() {
-            var actuals = fill(args, slice.call(arguments), isPlaceholder);                   
+            var actuals = fill(args, slice.call(arguments), isPlaceholder);
             return argumentsMissing(fn, actuals)
                 ? wrap(fn, actuals, source)
                 : fn.apply(this, actuals);
@@ -85,7 +85,7 @@ var lambda = (function() {
     }
 
     function show(args, source) {
-        return 'lambda(' + source + ')' + map(args, function(a) { 
+        return 'lambda(' + source + ')' + map(args, function(a) {
             return '(' + (isPlaceholder(a) ? '_' : a) + ')'; }).join('');
     }
 
@@ -96,7 +96,7 @@ var lambda = (function() {
     function withArity(arity, fn) {
         if (arity < 0) throw Error();
         var args = map(Array(arity), function(v, i) { return '$' + i; });
-    
+
         if (Function.bind) {
             var body = 'return this.apply(null, arguments)';
             var result = Function.apply(null, args.concat([body])).bind(fn);
@@ -113,7 +113,7 @@ var lambda = (function() {
 
     function fill(a, b, missing) {
         var result = slice.call(a);
-         
+
         for (var i = 0, j = 0; i < a.length; ++i) {
             if (missing(a[i])) {
                 for (; j < b.length; ++j) {
@@ -124,7 +124,7 @@ var lambda = (function() {
                 }
             }
         }
-        
+
         return result.concat(slice.call(b, j));
     }
 
@@ -137,7 +137,7 @@ var lambda = (function() {
             return (cell ? cell : row[row.length] = [key, fn.apply(this, key)])[1];
         });
     }
-    
+
     function identity(fn) { return fn; }
 
     function flip(fn) {
@@ -146,12 +146,12 @@ var lambda = (function() {
 
     function compose() {
         return fold(arguments, function(a, b) {
-            return withArity(b.length, function() { 
-                return a.call(this, b.apply(this, arguments)); 
+            return withArity(b.length, function() {
+                return a.call(this, b.apply(this, arguments));
             });
         });
     }
-    
+
     function curry(fn) {
         var args = slice.call(arguments, 1);
         return withArity(Math.max(0, fn.length - args.length), function() {
@@ -168,20 +168,20 @@ var lambda = (function() {
 
     function any(array, fn) {
         return each(array, function(elt, e) {
-            if (fn.call(this, elt, e)) return true; 
+            if (fn.call(this, elt, e)) return true;
         }) || false;
     }
 
     function all(array, fn) {
         // return !any(array, negate(fn));
         return !each(array, function(elt, e) {
-            if (!fn.call(this, elt, e)) return true; 
+            if (!fn.call(this, elt, e)) return true;
         });
-    } 
+    }
 
     function none(array, fn) {
         return !any(array, fn);
-    }  
+    }
 
     function one(array, fn) {
         return count(array, fn) === 1;
@@ -221,7 +221,7 @@ var lambda = (function() {
 
     function bind(fn, cx) {
         return withArity(fn.length, function() {
-            return fn.apply(cx, arguments); 
+            return fn.apply(cx, arguments);
         });
     }
 
@@ -369,9 +369,11 @@ var lambda = (function() {
     // Miscellaneous
     lambda.nil = lambda.empty      = lambda('_.length == 0');
     lambda.len = /*lambda.length =*/ lambda('_.length');
-    lambda.str = lambda.toString   = lambda('_.toString()'); 
+    lambda.str = lambda.toString   = lambda('_.toString()');
 
     return lambda;
 })();
 
-
+if (typeof module != 'undefined') {
+    module.exports = lambda;
+}

@@ -1,3 +1,6 @@
+// Copyright (c) 2014, Alvaro J. Genial (http://alva.ro)
+
+var lambda = this.lambda || require('./lambda.js');
 
 // Values
 equal( lambda.id(42), 42 );
@@ -109,5 +112,4 @@ function equalStrings(a, b) {
 }
 
 // Success!
-(print || (console && console.log) || function() {})("All tests passed!");
-
+console.log("All tests passed!");
