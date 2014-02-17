@@ -1,7 +1,7 @@
 lambda
 ======
 
-An experimental functional JavaScript library
+An experimental functional JavaScript library, written by [Alvaro J. Genial](http://alva.ro).
 
 [![Build Status](https://travis-ci.org/ajg/lambda.png?branch=master)](https://travis-ci.org/ajg/lambda)
 
