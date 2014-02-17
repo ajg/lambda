@@ -1,0 +1,7 @@
+{
+  "name": "lambda",
+  "version": "1.0.1",
+  "description": "An experimental functional JavaScript library",
+  "scripts": { "test": "node tests.js" },
+  "devDependencies": { "test": ">=0.0.5" }
+}
