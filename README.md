@@ -3,6 +3,8 @@ lambda
 
 An experimental functional JavaScript library
 
+[![Build Status](https://travis-ci.org/ajg/lambda.png?branch=master)](https://travis-ci.org/ajg/lambda)
+
 Status
 ------
 
